@@ -1,6 +1,3 @@
-from operator import inv
-from symbol import return_stmt, star_expr
-from turtle import color
 import numpy as np
 from functools import reduce
 from itertools import product
@@ -27,7 +24,7 @@ class Network(nx.Graph):
     def update_edge(self, node1, node2, resistance):
         if node1==node2:
             return
-        if self.has_edge(node1,node2):
+        if self.has_edge(node1, node2):
             parallel_resistance = self[node1][node2]['resistance']
             if parallel_resistance * resistance==0:
                 self[node1][node2]['resistance'] = 0
@@ -35,11 +32,11 @@ class Network(nx.Graph):
                 resistance = (parallel_resistance * resistance)/(parallel_resistance + resistance)
                 self[node1][node2]['resistance'] = resistance
         else:
-            self.add_edge(node1,node2,resistance = resistance)
+            self.add_edge(node1, node2, resistance = resistance)
 
     def pop_edge(self, node1, node2):
         resistance = self[node1][node2]['resistance']
-        self.remove_edge(node1,node2)
+        self.remove_edge(node1, node2)
         return resistance
 
     def star_mesh(self, node):
@@ -53,9 +50,9 @@ class Network(nx.Graph):
             self.remove_node(node)
             return neighbors
         resistances = list(map(lambda x: self.pop_edge(node,x),neighbors))
-        min_resistance,min_edge = min(zip(resistances,neighbors),key=lambda x: x[0])
+        min_resistance,min_neighbor = min(zip(resistances,neighbors),key=lambda x: x[0])
         if min_resistance==0:
-            new_edges = list(map(lambda i:(min_edge,i[0],i[1]),zip(neighbors,resistances)))
+            new_edges = list(map(lambda i:(min_neighbor,i[0],i[1]),zip(neighbors,resistances)))
             list(map(lambda i: self.update_edge(i[0],i[1],i[2]), new_edges))
         else:
             harmonic_sum = reduce(lambda a,b: a+b, map(lambda x:1/x,resistances))
@@ -72,6 +69,8 @@ class Network(nx.Graph):
                 return self.star_mesh(node)
 
     def delta_wye(self, node1, node2, node3, newnode):
+        if newnode in self.nodes:
+            return
         nodes = [node1,node2,node3]
         edges = [(node2,node3),(node3,node1),(node1,node2)]
         for edge in edges:
@@ -90,7 +89,7 @@ class Network(nx.Graph):
             self.update_edge(nodes[i], newnode, resistance=res_mult/sum_r)
         return newnode
 
-    def shift_node(self,fromnode,tonode):
+    def shift_node(self, fromnode, tonode):
         if fromnode in self.staticnodes:
             return
         if self.has_node(tonode):
@@ -107,9 +106,9 @@ class Network(nx.Graph):
         if self[keepnode][mergenode]['resistance']!=0:
             return False
         neighbors = list(self.neighbors(mergenode))
-        if len(neighbors)==0:
+        if len(neighbors)==1:
             self.remove_node(mergenode)
-            return False
+            return True
         resistances = list(map(lambda x: self.pop_edge(mergenode,x),neighbors))
         new_edges = list(map(lambda i:(keepnode,i[0],i[1]),zip(neighbors,resistances)))
         list(map(lambda i: self.update_edge(i[0],i[1],i[2]), new_edges))
@@ -152,7 +151,7 @@ class Lattice2DGrid(Network):
         self.figtitle = f"{self.terminal_start}<->{self.terminal_end}"
         if terminal_start==terminal_end:
             print(f"{terminal_start}<->{terminal_end}: Shorted measurement terminals!")
-            return        
+            return
         self.Xlen,self.Ylen = latticeData.shape
         self.Xlen,self.Ylen = self.Xlen+1,self.Ylen+1
         
