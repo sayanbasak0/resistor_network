@@ -9,5 +9,7 @@
 * 2D Lattice data 
   * Function mapping lattice data to horizontal and vertical resistors
 
+![Alt Text](python/left-right_5x5_2.gif)
+
 [1] D. J. Frank and C. J. Lobb, *Highly efficient algorithm for percolative transport studies in two dimensions*, [Phys. Rev. B **37**, 302 (1988)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.37.302).
 
